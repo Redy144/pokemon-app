@@ -42,3 +42,4 @@ yarn-error.*
 
 # agent
 .cursor/
+.claude/
