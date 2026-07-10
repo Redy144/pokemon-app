@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { deletePinPhoto } from '@/lib/photoStorage';
 import { MAP_PINS_KEY, storage } from '@/lib/storage';
 import type { MapPin } from '@/types/mapPin';
 import type { PokemonListItem } from '@/types/pokemon';
@@ -33,6 +34,12 @@ type MapPinsContextValue = {
   pins: MapPin[];
   assignedPokemonIds: Set<number>;
   addPin: (latitude: number, longitude: number) => MapPin;
+  addPhotoPin: (
+    id: string,
+    latitude: number,
+    longitude: number,
+    photoUri: string,
+  ) => MapPin;
   assignPokemon: (pinId: string, pokemon: PokemonListItem) => void;
   deletePin: (pinId: string) => void;
 };
@@ -45,9 +52,9 @@ export function MapPinsProvider({ children }: { children: ReactNode }) {
   const assignedPokemonIds = useMemo(
     () =>
       new Set(
-        pins
-          .filter((pin) => pin.pokemon !== null)
-          .map((pin) => pin.pokemon!.id),
+        pins.flatMap((pin) =>
+          pin.content.type === 'pokemon' ? [pin.content.pokemon.id] : [],
+        ),
       ),
     [pins],
   );
@@ -57,7 +64,7 @@ export function MapPinsProvider({ children }: { children: ReactNode }) {
       id: createPinId(),
       latitude,
       longitude,
-      pokemon: null,
+      content: { type: 'empty' },
     };
     setPins((current) => {
       const next = [...current, newPin];
@@ -67,10 +74,30 @@ export function MapPinsProvider({ children }: { children: ReactNode }) {
     return newPin;
   }, []);
 
+  const addPhotoPin = useCallback(
+    (id: string, latitude: number, longitude: number, photoUri: string) => {
+      const newPin: MapPin = {
+        id,
+        latitude,
+        longitude,
+        content: { type: 'photo', photoUri },
+      };
+      setPins((current) => {
+        const next = [...current, newPin];
+        saveMapPins(next);
+        return next;
+      });
+      return newPin;
+    },
+    [],
+  );
+
   const assignPokemon = useCallback((pinId: string, pokemon: PokemonListItem) => {
     setPins((current) => {
       const next = current.map((pin) =>
-        pin.id === pinId ? { ...pin, pokemon } : pin,
+        pin.id === pinId
+          ? { ...pin, content: { type: 'pokemon' as const, pokemon } }
+          : pin,
       );
       saveMapPins(next);
       return next;
@@ -79,7 +106,11 @@ export function MapPinsProvider({ children }: { children: ReactNode }) {
 
   const deletePin = useCallback((pinId: string) => {
     setPins((current) => {
-      const next = current.filter((pin) => pin.id !== pinId);
+      const pin = current.find((entry) => entry.id === pinId);
+      if (pin?.content.type === 'photo') {
+        deletePinPhoto(pin.content.photoUri);
+      }
+      const next = current.filter((entry) => entry.id !== pinId);
       saveMapPins(next);
       return next;
     });
@@ -90,10 +121,11 @@ export function MapPinsProvider({ children }: { children: ReactNode }) {
       pins,
       assignedPokemonIds,
       addPin,
+      addPhotoPin,
       assignPokemon,
       deletePin,
     }),
-    [pins, assignedPokemonIds, addPin, assignPokemon, deletePin],
+    [pins, assignedPokemonIds, addPin, addPhotoPin, assignPokemon, deletePin],
   );
 
   return (

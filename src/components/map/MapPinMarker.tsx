@@ -1,4 +1,6 @@
+import { useCallback, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
 import { Marker } from 'react-native-maps';
 import { Heart, MapPin } from 'lucide-react-native';
 import { colors, radius } from '@/constants/theme';
@@ -6,6 +8,7 @@ import type { MapPin as MapPinData } from '@/types/mapPin';
 import PokemonSprite from '@/components/ui/PokemonSprite';
 
 const MARKER_SPRITE_SIZE = 36;
+const MARKER_PHOTO_SIZE = 36;
 
 type Props = {
   pin: MapPinData;
@@ -15,11 +18,20 @@ type Props = {
 };
 
 export default function MapPinMarker({ pin, isSelected, isFavorite, onPress }: Props) {
+  const hasPhoto = pin.content.type === 'photo';
+  const [tracksViewChanges, setTracksViewChanges] = useState(hasPhoto);
+
+  const handlePhotoLoad = useCallback(() => {
+    setTracksViewChanges(false);
+  }, []);
+
+  const isEmpty = pin.content.type === 'empty';
 
   return (
     <Marker
       coordinate={{ latitude: pin.latitude, longitude: pin.longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
+      tracksViewChanges={tracksViewChanges}
       onPress={() => onPress(pin)}
     >
       <View style={styles.markerWrapper} collapsable={false}>
@@ -27,13 +39,22 @@ export default function MapPinMarker({ pin, isSelected, isFavorite, onPress }: P
           style={[
             styles.marker,
             isSelected && styles.markerSelected,
-            !pin.pokemon && styles.markerEmpty,
+            isEmpty && styles.markerEmpty,
+            hasPhoto && styles.markerPhoto,
           ]}
         >
-          {pin.pokemon ? (
+          {pin.content.type === 'photo' ? (
+            <Image
+              source={{ uri: pin.content.photoUri }}
+              style={styles.photo}
+              contentFit="cover"
+              onLoad={handlePhotoLoad}
+              onError={handlePhotoLoad}
+            />
+          ) : pin.content.type === 'pokemon' ? (
             <PokemonSprite
-              key={pin.pokemon.imageUrl}
-              imageUrl={pin.pokemon.imageUrl}
+              key={pin.content.pokemon.imageUrl}
+              imageUrl={pin.content.pokemon.imageUrl}
               size={MARKER_SPRITE_SIZE}
             />
           ) : (
@@ -67,6 +88,15 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.primary,
     padding: 2,
+  },
+  markerPhoto: {
+    padding: 0,
+    overflow: 'hidden',
+  },
+  photo: {
+    width: MARKER_PHOTO_SIZE,
+    height: MARKER_PHOTO_SIZE,
+    borderRadius: radius.full,
   },
   favoriteBadge: {
     position: 'absolute',

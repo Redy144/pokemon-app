@@ -14,6 +14,8 @@ const config: ExpoConfig = {
     infoPlist: {
       NSCameraUsageDescription: 'Allow Pokémon App to use the camera for AR detection.',
       NSPhotoLibraryAddUsageDescription: 'Allow Pokémon App to save photos to the library.',
+      NSLocationWhenInUseUsageDescription:
+        'Allow Pokémon App to use your location to place pins on the map.',
     },
   },
   android: {
@@ -25,7 +27,7 @@ const config: ExpoConfig = {
       monochromeImage: './assets/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
-    permissions: ['android.permission.CAMERA', 'android.permission.WRITE_EXTERNAL_STORAGE'],
+    permissions: ['android.permission.CAMERA', 'android.permission.WRITE_EXTERNAL_STORAGE','android.permission.ACCESS_FINE_LOCATION'],
   },
   web: {
     favicon: './assets/favicon.png',
@@ -33,6 +35,13 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-dev-client',
+    [
+      'expo-location',
+      {
+        locationWhenInUsePermission:
+          'Allow Pokémon App to use your location to place pins on the map.',
+      },
+    ],
     'expo-image',
     [
       'react-native-maps',

@@ -3,12 +3,12 @@ import { View } from 'react-native';
 import { commonStyles } from '@/styles/common';
 import type { MapPin } from '@/types/mapPin';
 import { useFavoritePokemon } from '@/contexts/FavoritePokemonContext';
-import { MapPinsProvider, useMapPins } from '@/contexts/MapPinsContext';
+import { useMapPins } from '@/contexts/MapPinsContext';
 import { useMapPinPlacement } from '@/hooks/useMapPinPlacement';
 import MapPinSheet, { type MapPinSheetRef } from '@/components/map/MapPinSheet';
 import PokemonMap from '@/components/map/PokemonMap';
 
-function MapScreenContent() {
+export default function MapScreen() {
   const { pins, assignedPokemonIds, assignPokemon, deletePin } = useMapPins();
   const { isFavorite } = useFavoritePokemon();
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
@@ -50,13 +50,5 @@ function MapScreenContent() {
         onSelectionChange={setSelectedPinId}
       />
     </View>
-  );
-}
-
-export default function MapScreen() {
-  return (
-    <MapPinsProvider>
-      <MapScreenContent />
-    </MapPinsProvider>
   );
 }

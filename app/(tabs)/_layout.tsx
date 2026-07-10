@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { colors } from '@/constants/theme';
 import { tabBarNavOptions } from '@/components/navigation/tabBarOptions';
+import { MapPinsProvider } from '@/contexts/MapPinsContext';
 import { List, Heart, Camera, Map } from 'lucide-react-native';
 import { useFonts, Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold, Nunito_800ExtraBold, Nunito_900Black } from '@expo-google-fonts/nunito';
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold } from '@expo-google-fonts/dm-sans';
@@ -40,46 +41,48 @@ export default function TabsLayout() {
   if (!loaded) return null;
 
   return (
-    <Tabs
-      screenOptions={{
-        freezeOnBlur: true,
-        lazy: true,
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
-        tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
-          paddingTop: 15,
-          paddingBottom: 10,
-          height: 80,
-        },
-        headerShown: true,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={tabBarNavOptions(FAVORITE_LABEL, Heart,
-          { title: FAVORITE_TITLE, subtitle: FAVORITE_SUBTITLE, icon: Heart },
-          { filled: true }
-        )}
-      />
-      <Tabs.Screen
-        name="pokemon-list"
-        options={tabBarNavOptions(POKEDEX_LABEL, List, { title: POKEDEX_TITLE, subtitle: POKEDEX_SUBTITLE, },
-        )}
-      />
-      <Tabs.Screen
-        name="camera"
-        options={tabBarNavOptions(CAMERA_LABEL, Camera, { title: CAMERA_TITLE, subtitle: CAMERA_SUBTITLE },
-        )}
-      />
-      <Tabs.Screen
-        name="map"
-        options={tabBarNavOptions(MAP_LABEL, Map, { title: MAP_TITLE, subtitle: MAP_SUBTITLE },
-        )}
-      />
-    </Tabs>
+    <MapPinsProvider>
+      <Tabs
+        screenOptions={{
+          freezeOnBlur: true,
+          lazy: true,
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.mutedForeground,
+          tabBarStyle: {
+            backgroundColor: colors.background,
+            borderTopColor: colors.border,
+            borderTopWidth: 1,
+            paddingTop: 15,
+            paddingBottom: 10,
+            height: 80,
+          },
+          headerShown: true,
+        }}
+      >
+        <Tabs.Screen
+          name="index"
+          options={tabBarNavOptions(FAVORITE_LABEL, Heart,
+            { title: FAVORITE_TITLE, subtitle: FAVORITE_SUBTITLE, icon: Heart },
+            { filled: true }
+          )}
+        />
+        <Tabs.Screen
+          name="pokemon-list"
+          options={tabBarNavOptions(POKEDEX_LABEL, List, { title: POKEDEX_TITLE, subtitle: POKEDEX_SUBTITLE, },
+          )}
+        />
+        <Tabs.Screen
+          name="camera"
+          options={tabBarNavOptions(CAMERA_LABEL, Camera, { title: CAMERA_TITLE, subtitle: CAMERA_SUBTITLE },
+          )}
+        />
+        <Tabs.Screen
+          name="map"
+          options={tabBarNavOptions(MAP_LABEL, Map, { title: MAP_TITLE, subtitle: MAP_SUBTITLE },
+          )}
+        />
+      </Tabs>
+    </MapPinsProvider>
   );
 }

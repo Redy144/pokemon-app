@@ -55,15 +55,26 @@ export default function PokemonMap({
         onLongPress={onMapLongPress}
       >
         {loadState === 'ready' &&
-          pins.map((pin) => (
+          pins.map((pin) => {
+            const contentKey =
+              pin.content.type === 'photo'
+                ? pin.content.photoUri
+                : pin.content.type === 'pokemon'
+                  ? String(pin.content.pokemon.id)
+                  : 'empty';
+
+            return (
             <MapPinMarker
-              key={`${pin.id}-${pin.pokemon?.id ?? 'empty'}-${selectedPinId === pin.id}`}
+              key={`${pin.id}-${contentKey}-${selectedPinId === pin.id}`}
               pin={pin}
               isSelected={selectedPinId === pin.id}
-              isFavorite={pin.pokemon !== null && isFavorite(pin.pokemon.id)}
+              isFavorite={
+                pin.content.type === 'pokemon' && isFavorite(pin.content.pokemon.id)
+              }
               onPress={onMarkerPress}
             />
-          ))}
+            );
+          })}
       </MapView>
 
       {loadState === 'loading' && (

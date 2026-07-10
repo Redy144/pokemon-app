@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import type { MapPin } from '@/types/mapPin';
 import type { PokemonListItem } from '@/types/pokemon';
 import MapPinAssignContent from '@/components/map/MapPinAssignContent';
+import MapPinPhotoContent from '@/components/map/MapPinPhotoContent';
 import PokemonDetailContent from '@/components/pokemon-detail/PokemonDetailContent';
 import ModalSheetContainer from '@/components/sheets/ModalSheetContainer';
 import { useModalBottomSheet } from '@/hooks/useModalBottomSheet';
@@ -83,9 +84,13 @@ const MapPinSheet = forwardRef<MapPinSheetRef, Props>(
         onSettle={handleSettle}
         contentStyle={styles.sheetContent}
       >
-        {activePin?.pokemon && (
+        {activePin?.content.type === 'photo' && (
+          <MapPinPhotoContent pin={activePin} onDelete={handleDeletePin} />
+        )}
+
+        {activePin?.content.type === 'pokemon' && (
           <PokemonDetailContent
-            pokemon={activePin.pokemon}
+            pokemon={activePin.content.pokemon}
             action={{
               label: DELETE_PIN_LABEL,
               onPress: handleDeletePin,
@@ -94,7 +99,7 @@ const MapPinSheet = forwardRef<MapPinSheetRef, Props>(
           />
         )}
 
-        {activePin && !activePin.pokemon && (
+        {activePin?.content.type === 'empty' && (
           <MapPinAssignContent
             pin={activePin}
             assignedPokemonIds={assignedPokemonIds}
